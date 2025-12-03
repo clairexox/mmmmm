@@ -40,6 +40,45 @@ a,button{font-family:inherit}
     overflow-x: hidden;
 }
 
+.search-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+#songSearch {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #222;
+    color: #fff;
+    font-size: 14px;
+}
+
+.suggestions {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    width: 100%;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1000;
+}
+
+.suggestions div {
+    padding: 8px 10px;
+    cursor: pointer;
+    color: #ddd;
+}
+
+.suggestions div:hover {
+    background: #333;
+}
 
 
 /* nice scrollbars */

@@ -42,6 +42,8 @@
     libList: document.getElementById('libList'),
     cardsGrid: document.getElementById('cardsGrid'),
     moreGrid: document.getElementById('moreGrid'),
+    searchInput: document.getElementById('searchInput'),
+    searchResults: document.getElementById('searchResults'),
 
     cover: document.getElementById('cover'),
     nowTitle: document.getElementById('nowTitle'),
@@ -474,6 +476,51 @@
 
     // Start with first track loaded (no autoplay)
     setTrack(0, 0, { autoplay: false });
+    /* ---------- SEARCH ---------- */
+function searchSongs(query) {
+  query = query.toLowerCase();
+  const results = [];
+
+  DATA.playlists.forEach((pl, pi) => {
+    pl.tracks.forEach((t, ti) => {
+      const hay = (t.title + ' ' + t.artist).toLowerCase();
+      if (hay.includes(query)) {
+        results.push({ plIndex: pi, trIndex: ti, track: t, cover: pl.cover });
+      }
+    });
+  });
+
+  return results;
+}
+
+function renderSearchResults(arr) {
+  if (!refs.searchResults) return;
+  refs.searchResults.innerHTML = '';
+
+  if (!arr.length) {
+    refs.searchResults.innerHTML = `<div class="no-results">No songs found</div>`;
+    return;
+  }
+
+  arr.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'search-item';
+    el.innerHTML = `
+      <img src="${item.cover}">
+      <div>
+        <strong>${item.track.title}</strong>
+        <p>${item.track.artist}</p>
+      </div>
+    `;
+    el.addEventListener('click', () => {
+      setTrack(item.plIndex, item.trIndex, { autoplay: true });
+      refs.searchResults.innerHTML = '';
+      refs.searchInput.value = '';
+    });
+    refs.searchResults.appendChild(el);
+  });
+}
+
   }
 
   /* ---------- expose helpers for console debugging ---------- */
@@ -488,4 +535,51 @@
   };
 
   init();
+  // ===== SEARCH BAR SYSTEM ===== 
+const songs = [
+    { title: "Song 1", artist: "Artist A" },
+    { title: "Song 2", artist: "Artist B" },
+    { title: "Song 3", artist: "Artist C" },
+    // add your real songs here
+];
+
+const searchInput = document.getElementById("songSearch");
+const suggestionsBox = document.getElementById("searchSuggestions");
+
+// show suggestions
+searchInput.addEventListener("input", () => {
+    const q = searchInput.value.toLowerCase().trim();
+    suggestionsBox.innerHTML = "";
+
+    if (q.length === 0) {
+        suggestionsBox.style.display = "none";
+        return;
+    }
+
+    const filtered = songs.filter(s =>
+        s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q)
+    );
+
+    if (filtered.length === 0) {
+        suggestionsBox.style.display = "none";
+        return;
+    }
+
+    filtered.forEach(song => {
+        const div = document.createElement("div");
+        div.textContent = `${song.title} – ${song.artist}`;
+        div.addEventListener("click", () => {
+            searchInput.value = song.title;
+            suggestionsBox.style.display = "none";
+
+            // --- HOOK THIS TO YOUR PLAYER ---
+            // loadSong(song.title);
+        });
+
+        suggestionsBox.appendChild(div);
+    });
+
+    suggestionsBox.style.display = "block";
+});
+
 })();
