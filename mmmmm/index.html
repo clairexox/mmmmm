@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spotify UI Clone</title>
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar">
+      <div class="logo">🎵</div>
+      <nav class="nav-links">
+        <a href="#">Home</a>
+        <a href="#">Search</a>
+        <a href="#">Your Library</a>
+      </nav>
+      <div class="library-section">
+        <h3>Your Library</h3>
+        <div class="library-items">
+          <!-- Dynamic Playlist Items Here -->
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <input type="text" placeholder="What do you want to play?" class="search-bar" />
+      </header>
+
+      <section class="cards-section">
+        <h2>Playlists</h2>
+        <div class="cards-grid">
+          <!-- Playlist Cards -->
+        </div>
+      </section>
+    </main>
+
+    <section class="now-playing">
+      <div class="preview">
+        <!-- Song preview -->
+        <h2>Now Playing</h2>
+        <div class="preview-content">
+          <div class="img-box"></div>
+          <div class="text-box">
+            <h3>Song Title</h3>
+            <p>Artist Name</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="player-bar">
+    <div class="song-info">
+      <span class="title">Song Title</span>
+      <span class="artist">Artist Name</span>
+    </div>
+
+    <div class="controls">
+      <button>&#9664;&#9664;</button>
+      <button>&#9654;</button>
+      <button>&#9654;&#9654;</button>
+    </div>
+
+    <div class="progress">
+      <span>0:00</span>
+      <div class="bar">
+        <div class="bar-fill"></div>
+      </div>
+      <span>3:29</span>
+    </div>
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>
