@@ -9,7 +9,7 @@
         id: 'p1',
         title: 'Dump playlist',
         artist: 'gyuurin',
-        cover: 'assets/covers/weirdass.jpg',
+        cover: 'assets/covers/pee.jpg',
         tracks: [
           { id: 't1', title: 'Soft Hug', artist: 'gyuurin', src: 'assets/songs/soft-hug.mp3', lyrics: ['hey baby','you are my light','tiny hugs','i love you so much'] },
           { id: 't2', title: 'Moonwalk', artist: 'gyuurin', src: 'assets/songs/moonwalk.mp3', lyrics: ['walk with me','under the moon','hold my hand','never let go'] }
@@ -19,20 +19,20 @@
         id: 'p2',
         title: 'me, you, us and ducks',
         artist: 'gyuurin',
-        cover: 'assets/covers/cover2.jpg',
+        cover: 'assets/covers/buncof.jpg',
         tracks: [ { id: 't3', title: 'Duck Pond', artist: 'gyuurin', src: 'assets/songs/duck-pond.mp3', lyrics: ['quack quack','splash','cute little ducks','i love this'] } ]
       },
       {
         id: 'p3',
         title: 'Lastri, sayang?',
         artist: 'ky',
-        cover: 'assets/covers/cover3.jpg',
+        cover: 'assets/covers/fart.jpg',
         tracks: [ { id: 't4', title: 'Sayang', artist: 'ky', src: 'assets/songs/sayang.mp3', lyrics: ['sayang','my heart','for you','all the time','a','b','c'] } ]
       }
     ],
     more: [
-      { cover: 'assets/covers/cover4.jpg' },
-      { cover: 'assets/covers/cover5.jpg' },
+      { cover: 'assets/covers/weirdass.jpg' },
+      { cover: 'assets/covers/orgen.jpg' },
       { cover: 'assets/covers/cover6.jpg' }
     ]
   };
