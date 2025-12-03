@@ -74,9 +74,117 @@ a,button{font-family:inherit}
 .meta p{color:var(--muted)}
 
 /* lyrics */
-.lyrics-box{margin-top:16px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:16px;border-radius:12px;min-height:160px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.lyric-line{font-size:18px;font-weight:700;color:var(--text);opacity:0;transform:translateY(12px);transition:opacity .45s ease,transform .45s ease}
-.lyric-line.show{opacity:1;transform:translateY(0)}
+.lyrics-box {
+  margin-top: 16px;
+  background: linear-gradient(180deg,
+      rgba(255,255,255,0.03),
+      rgba(255,255,255,0.015)
+  );
+  padding: 18px;
+  border-radius: 14px;
+  height: 240px;                /* <-- adjust how tall you want */
+  overflow-y: auto;             /* <-- THE SCROLL MAGIC */
+  overflow-x: hidden;
+  position: relative;
+
+  backdrop-filter: blur(14px);
+  box-shadow: inset 0 0 18px rgba(0,0,0,0.3);
+
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbars (smooth Spotify style) */
+.lyrics-box::-webkit-scrollbar {
+  width: 10px;
+}
+
+.lyrics-box::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg,#1db95480,#1db95420);
+  border-radius: 999px;
+}
+
+.lyrics-box::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lyric-line.active {
+  color: var(--accent);
+  text-shadow: 0 0 14px rgba(29,185,84,0.4);
+  transform: scale(1.04);
+  transition: all .45s ease;
+}
+
+.lyric-line.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  bottom: -6px;
+  background: linear-gradient(90deg,var(--accent),#45ff8b);
+  border-radius: 999px;
+  filter: blur(4px);
+  animation: pulseWave 1.4s infinite ease-out;
+}
+
+@keyframes pulseWave {
+  0% { opacity: 0.9; transform: scaleX(0.6); }
+  70% { opacity: 0.15; transform: scaleX(1.4); }
+  100% { opacity: 0; transform: scaleX(1.8); }
+}
+
+.card {
+  transform-style: preserve-3d;
+  perspective: 900px;
+}
+
+.card:hover {
+  transform: rotateX(8deg) rotateY(-8deg) translateY(-10px);
+}
+
+.card:hover img {
+  transform: translateZ(20px);
+}
+
+.cover,
+.card img,
+.mini {
+  position: relative;
+  overflow: hidden;
+}
+
+.cover::before,
+.card img::before,
+.mini::before {
+  content: "";
+  position: absolute;
+  top: -100%;
+  left: -120%;
+  width: 260%;
+  height: 260%;
+  background: linear-gradient(120deg,
+      transparent 30%,
+      rgba(255,255,255,0.07) 50%,
+      transparent 70%);
+  transform: rotate(25deg);
+  transition: all 0.8s ease;
+}
+
+.cover:hover::before,
+.card:hover img::before,
+.mini:hover::before {
+  top: 100%;
+  left: 100%;
+}
+
+.card {
+  transition: transform .25s cubic-bezier(.21,1.02,.73,1);
+}
+
+.card:active {
+  transform: scale(.97);
+}
+
 
 /* small animated gradient under lyrics */
 .lyrics-box:before{content:'';position:absolute;inset:0;background:linear-gradient(90deg, rgba(29,185,84,0.06), rgba(120,200,255,0.02));pointer-events:none}
