@@ -73,6 +73,13 @@
     blobs: document.getElementById('blobs')
   };
 
+  /* ===== NEW LYRIC SYSTEM VARS ===== */
+let lyricScrollInterval = null;
+let lyricsFullscreen = false;
+
+const lyricsBox = document.querySelector('.lyrics-box');
+const lyricsContent = document.querySelector('.lyrics-content');
+
   /* ---------- AUDIO ENGINE ---------- */
   const audio = new Audio();
   audio.preload = 'metadata';
@@ -109,6 +116,40 @@
     renderLyricsPlaceholder(track.lyrics || []);
 
     if(autoplay) play();
+    /* ============================================================
+   FULLSCREEN LYRICS MODE
+   ============================================================ */
+function toggleLyricsFullscreen() {
+    lyricsFullscreen = !lyricsFullscreen;
+
+    if (lyricsFullscreen) {
+        lyricsBox.classList.add("fullscreen-lyrics");
+        document.body.classList.add("no-scroll");
+    } else {
+        lyricsBox.classList.remove("fullscreen-lyrics");
+        document.body.classList.remove("no-scroll");
+    }
+}
+
+    /* ============================================================
+   AUTO-SCROLL LYRICS (like Spotify)
+   ============================================================ */
+function startAutoScrollLyrics() {
+    stopAutoScrollLyrics(); // just in case
+
+    lyricScrollInterval = setInterval(() => {
+        // smooth continuous scroll
+        lyricsContent.scrollTop += 0.4; 
+    }, 16); // 60fps
+}
+
+function stopAutoScrollLyrics() {
+    if (lyricScrollInterval) {
+        clearInterval(lyricScrollInterval);
+        lyricScrollInterval = null;
+    }
+}
+
   }
 
   function play(){
