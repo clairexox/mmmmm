@@ -633,11 +633,26 @@
   function startDinoGame(container){
     if(!container) return null;
     container.innerHTML='';
+    // create a relative wrapper so we can spawn floating kaomojis behind
+    const wrap = document.createElement('div');
+    wrap.style.position = 'relative';
+    wrap.style.width = '100%';
+    wrap.style.height = '260px';
+    wrap.style.overflow = 'hidden';
+
     const canvas = document.createElement('canvas'); canvas.width=480; canvas.height=140; canvas.style.width='100%';
     const pad = document.createElement('div'); pad.className='gamepad'; const jumpBtn = document.createElement('button'); jumpBtn.className='btn'; jumpBtn.textContent='Jump'; pad.appendChild(jumpBtn);
-    container.appendChild(canvas); container.appendChild(pad);
+    // position canvas at top of wrap and pad below it
+    canvas.style.position = 'relative'; canvas.style.zIndex = '2';
+    pad.style.position = 'relative'; pad.style.zIndex = '2';
+    wrap.appendChild(canvas);
+    wrap.appendChild(pad);
+    container.appendChild(wrap);
     const ctx = canvas.getContext('2d'); let x=60,y=100,vy=0,jumping=false,obs=[],running=true,score=0;
     function spawn(){ if(!running) return; obs.push({x:canvas.width,y:110- (10+Math.random()*20),w:12}); setTimeout(spawn,900+Math.random()*700); }
+    // floating kaomojis in the background
+    let kaomojiInterval = null;
+    function spawnKaomoji(){ if(!running) return; const e = document.createElement('div'); e.style.position='absolute'; e.style.left = (10 + Math.random()*80) + '%'; e.style.bottom = '-10px'; e.style.zIndex='1'; e.style.fontSize = (14 + Math.random()*14) + 'px'; const choices = ['ꉂ(˵˃ ᗜ ˂˵)','(˶˃ ᵕ ˂˶) .ᐟ.ᐟ','˚ʚ♡ɞ˚','⸜(｡˃ ᵕ ˂ )⸝♡']; e.textContent = choices[Math.floor(Math.random()*choices.length)]; e.style.opacity = '0.95'; e.style.transition = 'transform 6s linear, opacity 1.2s linear'; wrap.appendChild(e); requestAnimationFrame(()=>{ e.style.transform = 'translateY(-220px)'; e.style.opacity='0'; }); setTimeout(()=>{ if(e.parentNode) e.parentNode.removeChild(e); }, 6200); }
     function loop(){ if(!running) return; ctx.fillStyle='#050505'; ctx.fillRect(0,0,canvas.width,canvas.height); // ground
       ctx.fillStyle='#fff'; ctx.fillRect(0,120,canvas.width,2);
       if(jumping) vy+=0.9; y+=vy; if(y>100){ y=100; jumping=false; vy=0; }
@@ -653,8 +668,11 @@
     jumpBtn.addEventListener('touchstart', doJump); jumpBtn.addEventListener('mousedown', doJump);
     function onKey(e){ if((e.code==='Space' || e.key===' ') ) doJump(); }
     window.addEventListener('keydown', onKey);
-    spawn(); loop();
-    return ()=>{ running=false; window.removeEventListener('keydown', onKey); jumpBtn.replaceWith(jumpBtn.cloneNode(true)); };
+    spawn();
+    // start spawning kaomojis
+    kaomojiInterval = setInterval(spawnKaomoji, 800);
+    loop();
+    return ()=>{ running=false; window.removeEventListener('keydown', onKey); jumpBtn.replaceWith(jumpBtn.cloneNode(true)); clearInterval(kaomojiInterval); };
   }
 
   // Fishing game — fishing-pac replacement, touch controls: left/right and cast
@@ -691,6 +709,100 @@
     return ()=>{ running=false; window.removeEventListener('keydown', onKey); leftBtn.replaceWith(leftBtn.cloneNode(true)); rightBtn.replaceWith(rightBtn.cloneNode(true)); castBtn.replaceWith(castBtn.cloneNode(true)); };
   }
 
+  // Lyric recital: fade lines in one by one with floating flowers/kaomojis
+  function startLyricRecital(container){
+    if(!container) return null;
+    container.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.style.position = 'relative';
+    wrap.style.width = '100%';
+    wrap.style.height = '260px';
+    wrap.style.overflow = 'hidden';
+    wrap.style.display = 'flex';
+    wrap.style.alignItems = 'center';
+    wrap.style.justifyContent = 'center';
+    wrap.style.padding = '12px';
+
+    const textBox = document.createElement('div');
+    textBox.style.position = 'relative';
+    textBox.style.zIndex = '2';
+    textBox.style.width = '100%';
+    textBox.style.maxWidth = '520px';
+    textBox.style.margin = '0 auto';
+    textBox.style.textAlign = 'center';
+
+    const lines = [
+      'you are the little spark that lights my mornings (´｡• ᵕ •｡`)',
+      'petals fall when you laugh, i collect them 🌸',
+      'tiny hands, warm heart, soft night whispers ✨',
+      'my favorite place is whatever room you are in (ღ˘⌣˘ღ)'
+    ];
+
+    const nodes = lines.map(t => {
+      const d = document.createElement('div');
+      d.textContent = t;
+      d.style.opacity = '0';
+      d.style.transition = 'opacity .9s ease, transform .9s ease';
+      d.style.transform = 'translateY(8px)';
+      d.style.fontSize = '18px';
+      d.style.color = 'var(--text)';
+      d.style.margin = '8px 0';
+      textBox.appendChild(d);
+      return d;
+    });
+
+    wrap.appendChild(textBox);
+    container.appendChild(wrap);
+
+    // floating flowers / kaomoji background
+    let floatInterval = null;
+    function spawnFloat(){
+      const el = document.createElement('div');
+      el.style.position = 'absolute';
+      el.style.left = Math.random()*90 + '%';
+      el.style.bottom = '-10px';
+      el.style.zIndex = '1';
+      el.style.fontSize = (12 + Math.random()*18) + 'px';
+      const choices = ['🌸','🌺','✿','(ˆ⌣ˆ)','(｡♥‿♥｡)','(´｡• ᵕ •｡`)'];
+      el.textContent = choices[Math.floor(Math.random()*choices.length)];
+      el.style.opacity = '0.95';
+      el.style.transition = 'transform 6s linear, opacity 1.2s linear';
+      wrap.appendChild(el);
+      // force layout
+      requestAnimationFrame(()=>{
+        el.style.transform = 'translateY(-320px)';
+        el.style.opacity = '0.0';
+      });
+      // cleanup after animation
+      setTimeout(()=>{ if(el.parentNode) el.parentNode.removeChild(el); }, 6200);
+    }
+
+    floatInterval = setInterval(spawnFloat, 700);
+
+    // reveal lines one by one
+    let i = 0;
+    const revealInterval = setInterval(()=>{
+      if(i < nodes.length){
+        nodes[i].style.opacity = '1';
+        nodes[i].style.transform = 'translateY(0)';
+        i++;
+      } else {
+        // stop revealing; keep the text visible
+        clearInterval(revealInterval);
+      }
+    }, 900);
+
+    // Return cleanup
+    return ()=>{
+      clearInterval(floatInterval);
+      clearInterval(revealInterval);
+      // remove any remaining floats
+      const leftovers = wrap.querySelectorAll('div');
+      leftovers.forEach(n=>{});
+      container.innerHTML = '';
+    };
+  }
+
   // wire romantic action elements (non-intrusive)
   document.addEventListener('click', (e) => {
     const el = e.target.closest && e.target.closest('.romantic-action');
@@ -701,7 +813,14 @@
       const t = document.getElementById('loveNote'); if(t) t.value = 'You are my moonlight...';
       return;
     }
+    // Section-level "Show all" opens the lyrical recital (sweet message)
     if (act === 'show-all'){
+      const overlay = openGameModal('For You — A Little Recital', `<div id="recitalWrap"></div>`);
+      overlay._cleanup = startLyricRecital(overlay.querySelector('#recitalWrap'));
+      return;
+    }
+    // Topbar filter "All" opens the unlimited Dino game
+    if (act === 'all-dino'){
       const overlay = openGameModal('Unlimited Dino', `<div id="dinoWrap"></div><p style="font-size:12px;color:var(--muted);margin-top:8px">Tap Jump or press Space. Mobile gamepad available.</p>`);
       overlay._cleanup = startDinoGame(overlay.querySelector('#dinoWrap'));
       return;

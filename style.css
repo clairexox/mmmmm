@@ -80,6 +80,13 @@ a,button{font-family:inherit}
     background: #333;
 }
 
+/* search suggestion item layout */
+.search-item{display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;color:#ddd}
+.search-item img{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0}
+.search-item div{display:flex;flex-direction:column}
+.search-item strong{font-size:14px}
+.search-item p{font-size:13px;color:var(--muted);margin:0}
+
 
 /* nice scrollbars */
 .content::-webkit-scrollbar, .library-list::-webkit-scrollbar{height:10px;width:10px}
