@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lyrics Demo — Spotify-style</title>
+  <style>
+    :root{
+      --bg:#0b0b0b; --panel:#0f0f0f; --muted:#9b9b9b; --text:#eaeaea; --accent:#1db954;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;padding:0;background:linear-gradient(180deg,#050505 0%, #0b0b0b 100%);color:var(--text);}
+    .app{min-height:100%;display:flex;align-items:center;justify-content:center;padding:28px}
+    .player{
+      width:100%;max-width:920px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:20px;box-shadow:0 6px 30px rgba(0,0,0,0.6);
+      display:grid;grid-template-columns:1fr 420px;gap:18px;align-items:start
+    }
+    /* Left: lyrics column */
+    .lyrics-panel{background:var(--panel);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px}
+    .track-meta{display:flex;gap:12px;align-items:center}
+    .cover{width:64px;height:64px;background:#222;border-radius:8px;flex:0 0 64px}
+    .meta-text{display:flex;flex-direction:column}
+    .title{font-size:18px;font-weight:600;color:var(--text)}
+    .artist{font-size:13px;color:var(--muted)}
+    /* Centered lyrics viewport */
+    .lyrics-viewport{height:420px;background:transparent;border-radius:8px;overflow:hidden;position:relative}
+    .lyrics-list{position:absolute;left:0;right:0;top:0;padding:24px 12px;box-sizing:border-box}
+    .lyric-line{font-size:20px;line-height:1.6;text-align:center;color:var(--muted);opacity:0.55;transform:translateY(0);transition:color .22s ease,opacity .35s ease,transform .35s cubic-bezier(.2,.9,.2,1),font-size .22s ease}
+    .lyric-line + .lyric-line{margin-top:10px}
+    .lyric-line.active{color:var(--text);opacity:1;font-size:24px;font-weight:600;transform:translateY(-2px)}
+    /* Right: controls / transcript */
+    .controls{display:flex;flex-direction:column;gap:12px;align-items:stretch}
+    audio{width:100%;background:transparent}
+    .hint{font-size:13px;color:var(--muted)}
+    /* subtle center indicator */
+    .center-mark{position:absolute;left:0;right:0;top:50%;height:0;pointer-events:none}
+
+    /* responsive */
+    @media (max-width:920px){.player{grid-template-columns:1fr;}.lyrics-viewport{height:360px}}
+    @media (max-width:520px){.lyric-line{font-size:16px}.lyric-line.active{font-size:20px}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="player" role="application">
+      <div class="lyrics-panel">
+        <div class="track-meta">
+          <div class="cover" id="cover"></div>
+          <div class="meta-text">
+            <div class="title" id="title">Demo Track</div>
+            <div class="artist" id="artist">Example Artist</div>
+          </div>
+        </div>
+
+        <div class="lyrics-viewport" id="viewport">
+          <div class="center-mark"></div>
+          <div class="lyrics-list" id="lyricsList"></div>
+        </div>
+        <div class="hint">Tip: Use the audio controls to play — active line stays centered and highlighted.</div>
+      </div>
+
+      <div class="controls">
+        <audio id="audio" controls preload="metadata">
+          <source src="audio.mp3" type="audio/mpeg">
+          Your browser doesn't support the audio element.
+        </audio>
+
+        <div style="background:rgba(255,255,255,0.02);padding:12px;border-radius:10px">
+          <div style="font-weight:600">Lyrics format</div>
+          <div class="hint">This demo accepts <strong>LRC</strong> (timestamped) strings or JSON with time (seconds) + text. The sample below is loaded automatically.</div>
+        </div>
+
+        <textarea id="lrcInput" style="height:220px;width:100%;margin-top:8px;background:#070707;color:var(--text);border-radius:8px;padding:12px;border:1px solid rgba(255,255,255,0.03);font-family:monospace;" aria-label="LRC input"></textarea>
+
+        <button id="loadBtn" style="margin-top:6px;padding:10px;border-radius:8px;background:var(--accent);color:#050505;border:0;font-weight:700;cursor:pointer">Load LRC</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Minimal LRC parsing + sync engine
+    const audio = document.getElementById('audio');
+    const listEl = document.getElementById('lyricsList');
+    const viewport = document.getElementById('viewport');
+    const lrcInput = document.getElementById('lrcInput');
+    const loadBtn = document.getElementById('loadBtn');
+
+    // Sample non-copyrighted LRC (demo) — timestamps in [mm:ss.xx]
+    const sampleLrc = `[00:00.00] Demo Track - Instrumental
+[00:04.10] This is the first demo line
+[00:08.80] Smoothly highlighted while the song plays
+[00:13.50] The active line becomes brighter and larger
+[00:18.00] Lines fade out when inactive and scroll into center
+[00:24.00] You can paste your own LRC here and press Load`;
+
+    lrcInput.value = sampleLrc;
+
+    function parseLrc(text){
+      const lines = text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+      const out = [];
+      const re = /\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]/g;
+      for(const ln of lines){
+        let m; const times = [];
+        while((m = re.exec(ln)) !== null){
+          const mm = parseInt(m[1],10); const ss = parseInt(m[2],10); const ms = m[3]? parseInt(m[3].padEnd(3,'0'),10):0;
+          times.push(mm*60 + ss + ms/1000);
+        }
+        const textOnly = ln.replace(re, '').trim();
+        for(const t of times) out.push({time:t, text:textOnly});
+      }
+      out.sort((a,b)=>a.time-b.time);
+      return out;
+    }
+
+    let parsed = [];
+    function renderLines(items){
+      listEl.innerHTML = '';
+      items.forEach((it, idx)=>{
+        const d = document.createElement('div');
+        d.className = 'lyric-line';
+        d.dataset.time = it.time;
+        d.dataset.index = idx;
+        d.textContent = it.text;
+        listEl.appendChild(d);
+      });
+      // position list vertically centered (start roughly with first lines centered)
+      // set listEl.top so first line begins near center
+      requestAnimationFrame(()=>{
+        // ensure listEl is tall enough
+        listEl.style.top = Math.max(0, (viewport.clientHeight/2) - (listEl.children[0]?.clientHeight||20)) + 'px';
+      });
+    }
+
+    function findActiveIndex(timeSec){
+      // binary search for performance
+      let lo=0, hi=parsed.length-1, ans=0;
+      while(lo<=hi){
+        const mid = Math.floor((lo+hi)/2);
+        if(parsed[mid].time <= timeSec){ ans=mid; lo=mid+1; } else { hi=mid-1; }
+      }
+      return ans;
+    }
+
+    // smooth scroll helper
+    let scrollAnim = null;
+    function smoothTo(target){
+      if(scrollAnim) cancelAnimationFrame(scrollAnim);
+      const start = listEl.scrollTop || 0;
+      const max = listEl.scrollHeight - viewport.clientHeight;
+      const dest = Math.max(0, Math.min(max, target));
+      const duration = 420; const t0 = performance.now();
+      function step(now){
+        const p = Math.min(1, (now - t0) / duration);
+        // easeInOutQuad
+        const eased = p<0.5? 2*p*p : -1 + (4-2*p)*p;
+        listEl.scrollTop = start + (dest - start) * eased;
+        if(p<1) scrollAnim = requestAnimationFrame(step);
+      }
+      scrollAnim = requestAnimationFrame(step);
+    }
+
+    let lastActive = -1;
+    function sync(){
+      const t = audio.currentTime || 0;
+      if(!parsed.length) { requestAnimationFrame(sync); return; }
+      const i = findActiveIndex(t);
+      if(i !== lastActive){
+        // toggle classes
+        if(lastActive >=0){ listEl.children[lastActive]?.classList.remove('active'); }
+        const node = listEl.children[i];
+        if(node){ node.classList.add('active');
+          // center the active node smoothly
+          const nodeTop = node.offsetTop;
+          const target = nodeTop - (viewport.clientHeight/2) + (node.clientHeight/2);
+          smoothTo(target);
+        }
+        lastActive = i;
+      }
+      requestAnimationFrame(sync);
+    }
+
+    // Load initial sample
+    function loadFromInput(){
+      try{
+        parsed = parseLrc(lrcInput.value || '');
+        if(!parsed.length){ listEl.innerHTML = '<div class="lyric-line">No timestamped lines found.</div>'; return; }
+        renderLines(parsed);
+      }catch(e){ console.error(e); }
+    }
+
+    loadBtn.addEventListener('click', ()=>{
+      loadFromInput();
+    });
+
+    // auto load sample
+    loadFromInput();
+
+    // start syncing when audio plays
+    audio.addEventListener('play', ()=>{
+      if(!parsed.length) loadFromInput();
+      requestAnimationFrame(sync);
+    });
+
+    // also keep sync running while paused so highlight updates when scrubbing
+    audio.addEventListener('seeked', ()=>{ if(!parsed.length) return; const i = findActiveIndex(audio.currentTime); if(i!==lastActive){ if(lastActive>=0) listEl.children[lastActive]?.classList.remove('active'); listEl.children[i]?.classList.add('active'); lastActive=i; const node = listEl.children[i]; if(node){ const nodeTop = node.offsetTop; const target = nodeTop - (viewport.clientHeight/2) + (node.clientHeight/2); smoothTo(target); } } });
+
+    // keep viewport scrolling when resizing
+    window.addEventListener('resize', ()=>{
+      if(lastActive>=0){ const node = listEl.children[lastActive]; if(node){ const nodeTop = node.offsetTop; const target = nodeTop - (viewport.clientHeight/2) + (node.clientHeight/2); listEl.scrollTop = target; } }
+    });
+  </script>
+</body>
+</html>

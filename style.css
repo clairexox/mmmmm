@@ -148,6 +148,18 @@ a,button{font-family:inherit}
     scroll-behavior: smooth;
 }
 
+/* base lyric line: centered, large, dimmed when inactive */
+.lyric-line{
+  position:relative;
+  font-size:20px;
+  line-height:1.6;
+  text-align:center;
+  color:var(--muted);
+  opacity:0.7;
+  transition:color .22s ease,opacity .28s ease,transform .28s cubic-bezier(.2,.9,.2,1),font-size .22s ease;
+}
+.lyric-line + .lyric-line{margin-top:10px}
+
 .fullscreen-lyrics {
     position: fixed;
     top: 0;
@@ -260,6 +272,17 @@ a,button{font-family:inherit}
 
 /* small animated gradient under lyrics */
 .lyrics-box:before{content:'';position:absolute;inset:0;background:linear-gradient(90deg, rgba(29,185,84,0.06), rgba(120,200,255,0.02));pointer-events:none}
+
+/* Fullscreen lyrics modal (Spotify-like) */
+.lyrics-fullscreen-modal{position:fixed;inset:0;background:linear-gradient(180deg,rgba(2,6,10,0.96),rgba(4,4,6,0.96));z-index:12000;display:flex;align-items:center;justify-content:center;padding:28px}
+.lyrics-fullscreen-modal .inner{width:100%;max-width:1400px;background:transparent;padding:28px;border-radius:8px;display:flex;gap:24px;align-items:flex-start}
+.lyrics-fullscreen-modal .col-left{flex:1}
+.lyrics-fullscreen-modal .col-right{width:420px}
+.lyrics-fullscreen-modal .sweet-note{color:var(--text);font-size:20px;margin-bottom:12px;text-align:center}
+.lyrics-fullscreen-modal .big-lyrics{background:transparent;height:72vh;overflow:auto;padding:40px 24px;border-radius:12px}
+.lyrics-fullscreen-modal .big-lyrics .lyric-line{font-size:48px;opacity:0.55;color:var(--muted);transition:all .28s ease;text-align:center}
+.lyrics-fullscreen-modal .big-lyrics .lyric-line.active{font-size:64px;opacity:1;color:var(--text);font-weight:700}
+.lyrics-fullscreen-modal .close-btn{position:absolute;right:20px;top:20px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);padding:8px 10px;border-radius:8px;cursor:pointer}
 
 /* compact romantic-action links */
 .romantic-action{cursor:pointer;color:#fff;text-decoration:underline dotted rgba(255,255,255,0.12);transition:color .18s ease,transform .12s}

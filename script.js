@@ -7,27 +7,74 @@
     playlists: [
       {
         id: 'p1',
-        title: 'Dump playlist',
-        artist: 'gyuurin',
+        title: 'From your side, to mine',
+        sweetMessage: 'For you — my favorite songs and tiny love notes. ❤',
+        artist: 'Shootmeplease2',
         cover: 'assets/covers/pee.jpg',
         tracks: [
-          { id: 't1', title: 'Soft Hug', artist: 'gyuurin', src: 'assets/songs/soft-hug.mp3', lyrics: ['hey baby','you are my light','tiny hugs','i love you so much'] },
-          { id: 't2', title: 'Moonwalk', artist: 'gyuurin', src: 'assets/songs/moonwalk.mp3', lyrics: ['walk with me','under the moon','hold my hand','never let go'] }
+            { id: 't1', title: 'Teenage Dirtbag', artist: 'Wheatus', src: 'assets/music/TEENAGE_DIRTBAG.mp3', sweetMessage: 'Noelle — you make my world a little brighter every day. 💖', lyrics: [
+              `Her name is Noelle, I have a dream about her
+She rings my bell, I got gym class in half an hour
+Oh, how she rocks in Keds and tube socks
+But she doesn't know who I am, and she doesn't give a damn about me
+
+'Cause I'm just a teenage dirtbag, baby
+Yeah, I'm just a teenage dirtbag, baby
+Listen to Iron Maiden, baby, with me, ooh
+
+Her boyfriend's a dick and he brings a gun to school
+And he'd simply kick my ass if he knew the truth
+He lives on my block, and he drives an IROC
+But he doesn't know who I am, and he doesn't give a damn about me
+
+'Cause I'm just a teenage dirtbag, baby
+Yeah, I'm just a teenage dirtbag, baby
+Listen to Iron Maiden, baby, with me, ooh
+
+Oh, yeah, dirtbag
+No, she doesn't know what she's missin'
+Oh, yeah, dirtbag
+No, she doesn't know what she's missin'
+
+Man, I feel like mold, it's prom night and I am lonely
+Lo and behold, she's walkin' over to me
+This must be fake, my lip starts to shake
+How does she know who I am? And why does she give a damn about me?
+
+I've got two tickets to Iron Maiden, baby
+Come with me Friday, don't say maybe
+I'm just a teenage dirtbag, baby, like you, ooh
+
+Oh, yeah, dirtbag
+No, she doesn't know what she's missin'
+Oh, yeah, dirtbag
+No, she doesn't know what she's missin'`
+            ] },
+            { id: 't2', title: 'S&M', artist: 'Rihanna', src: 'assets/music/TEENAGE_DIRTBAG.mp3', sweetMessage: 'When I hear this, I think of our late-night talks. 🌙', lyrics: ['walk with me','under the moon','hold my hand','never let go'] },
+            // Demo track with safe, non-copyrighted example showing
+            // paragraph and newline formatting for lyrics rendering.
+            { id: 't_demo', title: 'Demo: Paragraphs', artist: 'Example', src: 'assets/music/TEENAGE_DIRTBAG.mp3', sweetMessage: 'A tiny demo just for you — love you lots. 🌸', lyrics: [
+              "This is the first paragraph.\nIt demonstrates a line break inside a paragraph.",
+              "Here is the second paragraph, shown as its own block.",
+              "Final short line to finish the demo."
+            ] }
         ]
       },
       {
         id: 'p2',
         title: 'me, you, us and ducks',
+        sweetMessage: 'Quacks and cuddles — a little playlist for us 🦆',
         artist: 'gyuurin',
         cover: 'assets/covers/buncof.jpg',
-        tracks: [ { id: 't3', title: 'Duck Pond', artist: 'gyuurin', src: 'assets/songs/duck-pond.mp3', lyrics: ['quack quack','splash','cute little ducks','i love this'] } ]
+        tracks: [ { id: 't3', title: 'Duck Pond', artist: 'gyuurin', src: 'assets/music/TEENAGE_DIRTBAG.mp3', sweetMessage: 'Ducks and warm afternoons — thinking of you. 🦆', lyrics: ['quack quack','splash','cute little ducks','i love this'] } ]
       },
       {
         id: 'p3',
         title: 'Lastri, sayang?',
+        sweetMessage: 'Soft melodies for soft nights — love you 💫',
         artist: 'ky',
         cover: 'assets/covers/fart.jpg',
-        tracks: [ { id: 't4', title: 'Sayang', artist: 'ky', src: 'assets/songs/sayang.mp3', lyrics: ['sayang','my heart','for you','all the time','a','b','c'] } ]
+        tracks: [ { id: 't4', title: 'Sayang', artist: 'ky', src: 'assets/music/TEENAGE_DIRTBAG.mp3', sweetMessage: 'Sayang — always and forever. ✨', lyrics: ['sayang','my heart','for you','all the time','a','b','c'] } ]
       }
     ],
     more: [
@@ -58,6 +105,8 @@
     playBtn: document.getElementById('play'),
     prevBtn: document.getElementById('prev'),
     nextBtn: document.getElementById('next'),
+    loadFileBtn: document.getElementById('loadFileBtn'),
+    audioFileInput: document.getElementById('audioFileInput'),
 
     progressBar: document.getElementById('progressBar'),
     progressFill: document.getElementById('progressFill'),
@@ -78,6 +127,126 @@
   const audio = new Audio();
   audio.preload = 'metadata';
   audio.crossOrigin = 'anonymous';
+  // loop audio by default for endless play as requested
+  audio.loop = true;
+
+  /* ---------- Audio helpers: safe notices & simple validation ---------- */
+  function showAudioNotice(msg) {
+    clearAudioNotice();
+    try {
+      const n = document.createElement('div');
+      n.id = 'audioNotice';
+      n.style.position = 'fixed';
+      n.style.left = '50%';
+      n.style.top = '12px';
+      n.style.transform = 'translateX(-50%)';
+      n.style.zIndex = 14000;
+      n.style.background = 'linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))';
+      n.style.color = 'var(--text)';
+      n.style.padding = '10px 14px';
+      n.style.borderRadius = '10px';
+      n.style.border = '1px solid rgba(255,255,255,0.04)';
+      n.style.fontSize = '13px';
+      n.textContent = msg;
+      document.body.appendChild(n);
+    } catch (e) { console.warn('showAudioNotice failed', e); }
+  }
+
+  function clearAudioNotice() {
+    try { const ex = document.getElementById('audioNotice'); if (ex && ex.parentNode) ex.parentNode.removeChild(ex); } catch (e) { }
+  }
+
+  function tryValidateSrc(src) {
+    clearAudioNotice();
+    if (!src) {
+      showAudioNotice('No audio source set for this track. Place an MP3 at `assets/music/TEENAGE_DIRTBAG.mp3` or update DATA.');
+      return;
+    }
+    // If running from file://, avoid fetch which commonly fails due to CORS/file access.
+    if (location && location.protocol === 'file:') {
+      showAudioNotice('Running from file:// — media may not load reliably. Serve the folder over HTTP (e.g. `python -m http.server`).');
+      return;
+    }
+    // Otherwise try a lightweight HEAD to provide helpful feedback (best-effort)
+    try {
+      fetch(src, { method: 'HEAD' }).then(res => {
+        if (!res.ok) showAudioNotice('Audio file not reachable (HTTP ' + res.status + ').');
+        else clearAudioNotice();
+      }).catch(() => showAudioNotice('Unable to fetch audio; check path or CORS.'));
+    } catch (e) { /* ignore */ }
+  }
+
+  // audio-level error reporting
+  audio.addEventListener('error', () => {
+    const code = audio && audio.error ? audio.error.code : 'unknown';
+    showAudioNotice('Audio failed to load (code: ' + code + '). Check file path and serve over HTTP.');
+  });
+  audio.addEventListener('loadedmetadata', () => {
+    if (refs.durTime) refs.durTime.textContent = formatTime(audio.duration || 0);
+    clearAudioNotice();
+  });
+
+  function resolveAssetUrl(src) {
+    if (!src) return src;
+    // leave blob: and absolute URLs unchanged
+    if (src.startsWith('blob:') || /^https?:\/\//i.test(src) || src.startsWith('file:') || src.startsWith('/')) return src;
+    try {
+      return new URL(src, location.href).href;
+    } catch (e) { return src; }
+  }
+
+  function generateAssetCandidates(src) {
+    if (!src) return [];
+    const seen = new Set();
+    const add = (s) => { if (s && !seen.has(s)) { seen.add(s); return true; } return false; };
+    const candidates = [];
+    // original
+    add(src) && candidates.push(src);
+    // resolved against current document
+    try { const r = new URL(src, location.href).href; add(r) && candidates.push(r); } catch (e) {}
+    // resolved against document root
+    try {
+      const pathParts = location.pathname.split('/');
+      pathParts.pop();
+      const root = location.origin + (pathParts.join('/') || '/') + '/';
+      const r2 = new URL(src, root).href; add(r2) && candidates.push(r2);
+    } catch (e) {}
+    // common GitHub Pages repo root (owner/repo)
+    try {
+      const repoRoot = location.origin + '/mmmmm/';
+      const r3 = new URL(src, repoRoot).href; add(r3) && candidates.push(r3);
+    } catch (e) {}
+    // prepend ./
+    try { const dot = './' + src; add(dot) && candidates.push(dot); } catch (e) {}
+    return candidates;
+  }
+
+  // attempt to play a list of candidate URLs sequentially in the same user-gesture chain
+  function attemptPlayCandidates(candidates) {
+    return new Promise((resolve, reject) => {
+      let i = 0;
+      function tryNext() {
+        if (i >= candidates.length) return reject(new Error('all candidates failed'));
+        const c = candidates[i++];
+        try {
+          audio.src = c;
+          try { audio.load(); } catch (e) {}
+          const p = audio.play();
+          if (!p) {
+            // some browsers return undefined; assume success if no exception thrown
+            resolve(c);
+            return;
+          }
+          p.then(() => resolve(c)).catch(() => tryNext());
+        } catch (e) { tryNext(); }
+      }
+      tryNext();
+    });
+  }
+
+  // Keep audio usage minimal and robust: basic Audio() with loop enabled above.
+
+  // auto-detect removed to keep audio simple and robust
 
   const state = {
     playlistIndex: 0,
@@ -86,6 +255,9 @@
     lyricInterval: null,
     lrcLines: null
   };
+
+  // store object URL if user loads a local file so we can revoke it later
+  let currentObjectUrl = null;
 
   /* ---------- LYRICS: fullscreen + autosync ---------- */
   let lyricsFullscreen = false;
@@ -160,11 +332,22 @@
     if (refs.barArtist) refs.barArtist.textContent = track.artist;
 
     // audio
+    // If previously a user-loaded object URL exists, revoke it before switching
+    if (currentObjectUrl) {
+      try { URL.revokeObjectURL(currentObjectUrl); } catch (e) {}
+      currentObjectUrl = null;
+    }
     audio.src = track.src || '';
+    // ensure the element loads the new source and validate it safely
+    try { audio.load(); } catch (e) { /* ignore for older browsers */ }
+    tryValidateSrc(audio.src);
     audio.currentTime = 0;
 
-    // render lyrics
-    renderLyricsPlaceholder(track.lyrics || []);
+    // render lyrics or fallback to track's sweet message paragraphs
+    const lines = (track.lyrics && track.lyrics.length)
+      ? track.lyrics
+      : (track.sweetMessage ? [track.sweetMessage] : []);
+    renderLyricsPlaceholder(lines);
 
     if (autoplay) play();
   }
@@ -172,11 +355,35 @@
   /* ---------- PLAY / PAUSE / NEXT / PREV ---------- */
   function play() {
     if (!audio.src) { console.warn('no audio src'); }
+    // if running from file://, ensure we have an absolute file URL to the asset
+    try {
+      if (location && location.protocol === 'file:' && audio.src && !audio.src.startsWith('blob:')) {
+        const resolved = resolveAssetUrl(audio.src);
+        if (resolved && resolved !== audio.src) {
+          audio.src = resolved;
+          try { audio.load(); } catch (e) {}
+        }
+      }
+    } catch (e) { /* ignore */ }
+
     audio.play().then(() => {
       state.isPlaying = true;
       if (refs.playBtn) refs.playBtn.textContent = '❚❚';
       startLyricsAutoSync();
-    }).catch(err => console.warn('play error', err));
+      clearAudioNotice();
+    }).catch(err => {
+      // attempt multiple candidate URLs (helps on GitHub Pages or odd directory layouts)
+      const candidates = generateAssetCandidates(audio.src || '');
+      attemptPlayCandidates(candidates).then((used) => {
+        state.isPlaying = true;
+        if (refs.playBtn) refs.playBtn.textContent = '❚❚';
+        startLyricsAutoSync();
+        clearAudioNotice();
+      }).catch((e) => {
+        console.warn('play error', err, e);
+        showAudioNotice('Unable to play audio. If this is a local file, use the 📁 button or serve the folder over HTTP.');
+      });
+    });
   }
 
   function pause() {
@@ -330,17 +537,41 @@
   }
 
   /* ---------- LYRICS: placeholder rendering and LRC parsing ---------- */
+  // helper: smoothly center an element inside the lyrics box
+  function centerLyricElement(el){
+    if (!el || !refs.lyricsBox) return;
+    try{
+      const container = refs.lyricsBox;
+      // Use bounding rects for robust calculation when padding/positioning differs
+      const containerRect = container.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      const currentScroll = container.scrollTop || 0;
+      const offset = (elRect.top - containerRect.top) + currentScroll;
+      const target = offset - (container.clientHeight / 2) + (el.clientHeight / 2);
+      container.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+    }catch(e){ console.warn('centerLyricElement error', e); }
+  }
+
   function renderLyricsPlaceholder(lines) {
     if (!refs.lyricsBox) return;
     refs.lyricsBox.innerHTML = '';
     if (!lines || !lines.length) return;
 
-    const elems = lines.map(l => {
-      const el = document.createElement('div');
-      el.className = 'lyric-line';
-      el.textContent = l;
-      refs.lyricsBox.appendChild(el);
-      return el;
+    // Support paragraphs: allow each string to contain one or more paragraphs
+    // separated by blank lines (\n or \n\n). We split each incoming
+    // entry into individual rendered lines so timing/sync uses the
+    // actual number of displayed lines.
+    const elems = [];
+    lines.forEach(l => {
+      // split on one or more blank lines/newlines
+      const parts = String(l).split(/\n{1,}/).map(s => s.trim()).filter(Boolean);
+      parts.forEach(p => {
+        const el = document.createElement('div');
+        el.className = 'lyric-line';
+        el.textContent = p;
+        refs.lyricsBox.appendChild(el);
+        elems.push(el);
+      });
     });
 
     // clear any previous interval-like behavior
@@ -350,21 +581,25 @@
     }
 
     const startSync = () => {
-      const dur = isFinite(audio.duration) ? audio.duration : (lines.length * 2);
-      const per = Math.max(1.2, dur / lines.length);
+      const dur = isFinite(audio.duration) ? audio.duration : (elems.length * 2);
+      const per = Math.max(1.2, dur / Math.max(1, elems.length));
       let i = 0;
-      elems.forEach(e => e.classList.remove('show'));
-      if (elems[0]) elems[0].classList.add('show');
+      elems.forEach(e => e.classList.remove('active'));
+      if (elems[0]) {
+        elems[0].classList.add('active');
+        centerLyricElement(elems[0]);
+      }
 
       state.lyricInterval = setInterval(() => {
-        elems.forEach(e => e.classList.remove('show'));
+        elems.forEach(e => e.classList.remove('active'));
         i++;
         if (i >= elems.length) {
           clearInterval(state.lyricInterval);
           state.lyricInterval = null;
           return;
         }
-        elems[i].classList.add('show');
+        elems[i].classList.add('active');
+        centerLyricElement(elems[i]);
       }, per * 1000);
     };
 
@@ -401,7 +636,11 @@
       else break;
     }
     const nodes = refs.lyricsBox.querySelectorAll('.lyric-line');
-    nodes.forEach((n, i) => n.classList.toggle('show', i === idx));
+    nodes.forEach((n, i) => {
+      const isActive = i === idx;
+      n.classList.toggle('active', isActive);
+      if (isActive) centerLyricElement(n);
+    });
   }
 
   function loadLrcTextAndRender(lrcText) {
@@ -464,10 +703,34 @@
   function init() {
     render();
     genBlobs();
+    // auto-detect button removed for simpler UI per request
     // Hook controls
     if (refs.playBtn) refs.playBtn.addEventListener('click', togglePlay);
     if (refs.prevBtn) refs.prevBtn.addEventListener('click', prev);
     if (refs.nextBtn) refs.nextBtn.addEventListener('click', next);
+
+    // Allow user to load a local audio file via file input (user gesture bypasses file:// limits)
+    if (refs.loadFileBtn && refs.audioFileInput) {
+      refs.loadFileBtn.addEventListener('click', () => refs.audioFileInput.click());
+      refs.audioFileInput.addEventListener('change', (ev) => {
+        const f = ev.target.files && ev.target.files[0];
+        if (!f) return;
+        // revoke previous object URL if any
+        if (currentObjectUrl) {
+          try { URL.revokeObjectURL(currentObjectUrl); } catch (e) {}
+          currentObjectUrl = null;
+        }
+        currentObjectUrl = URL.createObjectURL(f);
+        audio.src = currentObjectUrl;
+        try { audio.load(); } catch (e) {}
+        // update UI to show file name
+        if (refs.barTitle) refs.barTitle.textContent = f.name;
+        if (refs.barArtist) refs.barArtist.textContent = 'Local file';
+        clearAudioNotice();
+        // autoplay after user selects file
+        play();
+      });
+    }
 
     // Click lyrics box to toggle fullscreen
     if (refs.lyricsBox) {
@@ -864,6 +1127,81 @@
       return;
     }
   });
+
+  // open fullscreen lyrics modal for a given playlist/track index
+  function openLyricsFullscreen(pi, ti, sweetText){
+    const pl = DATA.playlists[pi];
+    if(!pl) return;
+    const track = pl.tracks[ti];
+    if(!track) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'lyrics-fullscreen-modal';
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'close-btn';
+    closeBtn.textContent = 'Close';
+    closeBtn.addEventListener('click', ()=>{ if(overlay._cleanup) overlay._cleanup(); document.body.removeChild(overlay); });
+    overlay.appendChild(closeBtn);
+
+    const inner = document.createElement('div'); inner.className = 'inner';
+    const left = document.createElement('div'); left.className = 'col-left';
+    const right = document.createElement('div'); right.className = 'col-right';
+
+    // sweet note
+    const note = document.createElement('div'); note.className = 'sweet-note';
+    note.textContent = sweetText || 'For you — my sweetest melody.';
+    left.appendChild(note);
+
+    // big lyrics area
+    const big = document.createElement('div'); big.className = 'big-lyrics';
+    left.appendChild(big);
+
+    // right column: small meta + audio controls
+    const meta = document.createElement('div'); meta.style.color = 'var(--muted)';
+    meta.innerHTML = `<div style="font-weight:800">${track.title}</div><div style="margin-top:6px">${track.artist}</div>`;
+    right.appendChild(meta);
+    // attach existing player controls info
+    const hint = document.createElement('div'); hint.className = 'hint'; hint.style.marginTop='12px'; hint.textContent = 'Use the player below to play and scrub. Active line stays centered.';
+    right.appendChild(hint);
+
+    inner.appendChild(left); inner.appendChild(right);
+    overlay.appendChild(inner);
+    document.body.appendChild(overlay);
+
+    // show the track's sweet message (prefer per-track message, then provided sweetText)
+    const message = track.sweetMessage || sweetText || pl.sweetMessage || 'A little note for you.';
+    const msgEl = document.createElement('div');
+    msgEl.style.fontSize = '36px';
+    msgEl.style.lineHeight = '1.4';
+    msgEl.style.textAlign = 'center';
+    msgEl.style.padding = '40px';
+    msgEl.style.color = 'var(--text)';
+    msgEl.textContent = message;
+    big.appendChild(msgEl);
+
+    // cleanup (no listeners attached in simplified modal)
+    overlay._cleanup = ()=>{};
+
+    return overlay;
+  }
+
+  // click lyrics box to open fullscreen modal with a sweet note
+  if (refs.lyricsBox) {
+    refs.lyricsBox.addEventListener('dblclick', (e) => {
+      // double-click opens full-screen modal for current track
+      const sweet = "To my love — these words are for you 💖";
+      openLyricsFullscreen(state.playlistIndex, state.trackIndex, sweet);
+    });
+    // single click also opens modal (user asked click)
+    refs.lyricsBox.addEventListener('click', (e) => {
+      setTimeout(()=>{
+        if((e.detail || 1) === 1){
+          const sweet = "A little surprise — I love you 💐";
+          openLyricsFullscreen(state.playlistIndex, state.trackIndex, sweet);
+        }
+      }, 180);
+    });
+  }
 
   init();
   
