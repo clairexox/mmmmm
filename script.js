@@ -648,18 +648,46 @@
     wrap.appendChild(canvas);
     wrap.appendChild(pad);
     container.appendChild(wrap);
-    const ctx = canvas.getContext('2d'); let x=60,y=100,vy=0,jumping=false,obs=[],running=true,score=0;
-    function spawn(){ if(!running) return; obs.push({x:canvas.width,y:110- (10+Math.random()*20),w:12}); setTimeout(spawn,900+Math.random()*700); }
+    const ctx = canvas.getContext('2d'); let x=60,y=100,vy=0,jumping=false,obs=[],score=0;
+      let active = true; // overall game active until cleanup
+      let alive = true; // player alive state
+      let restartTimeout = null;
+
+      // spawn obstacles at a steady interval (more robust than recursive timeouts)
+      let spawnInterval = null;
+      function startSpawning(){
+        if (spawnInterval) return;
+        spawnInterval = setInterval(()=>{
+          if(!active) return;
+          obs.push({x:canvas.width,y:110- (10+Math.random()*20),w:12});
+        }, 900);
+      }
     // floating kaomojis in the background
     let kaomojiInterval = null;
-    function spawnKaomoji(){ if(!running) return; const e = document.createElement('div'); e.style.position='absolute'; e.style.left = (10 + Math.random()*80) + '%'; e.style.bottom = '-10px'; e.style.zIndex='1'; e.style.fontSize = (14 + Math.random()*14) + 'px'; const choices = ['ꉂ(˵˃ ᗜ ˂˵)','(˶˃ ᵕ ˂˶) .ᐟ.ᐟ','˚ʚ♡ɞ˚','⸜(｡˃ ᵕ ˂ )⸝♡']; e.textContent = choices[Math.floor(Math.random()*choices.length)]; e.style.opacity = '0.95'; e.style.transition = 'transform 6s linear, opacity 1.2s linear'; wrap.appendChild(e); requestAnimationFrame(()=>{ e.style.transform = 'translateY(-220px)'; e.style.opacity='0'; }); setTimeout(()=>{ if(e.parentNode) e.parentNode.removeChild(e); }, 6200); }
-    function loop(){ if(!running) return; ctx.fillStyle='#050505'; ctx.fillRect(0,0,canvas.width,canvas.height); // ground
+    function spawnKaomoji(){ if(!active) return; const e = document.createElement('div'); e.style.position='absolute'; e.style.left = (10 + Math.random()*80) + '%'; e.style.bottom = '-10px'; e.style.zIndex='1'; e.style.fontSize = (14 + Math.random()*14) + 'px'; const choices = ['ꉂ(˵˃ ᗜ ˂˵)','(˶˃ ᵕ ˂˶) .ᐟ.ᐟ','˚ʚ♡ɞ˚','⸜(｡˃ ᵕ ˂ )⸝♡']; e.textContent = choices[Math.floor(Math.random()*choices.length)]; e.style.opacity = '0.95'; e.style.transition = 'transform 6s linear, opacity 1.2s linear'; wrap.appendChild(e); requestAnimationFrame(()=>{ e.style.transform = 'translateY(-220px)'; e.style.opacity='0'; }); setTimeout(()=>{ if(e.parentNode) e.parentNode.removeChild(e); }, 6200); }
+    function loop(){ if(!active) return; ctx.fillStyle='#050505'; ctx.fillRect(0,0,canvas.width,canvas.height); // ground
       ctx.fillStyle='#fff'; ctx.fillRect(0,120,canvas.width,2);
       if(jumping) vy+=0.9; y+=vy; if(y>100){ y=100; jumping=false; vy=0; }
       ctx.fillStyle='#1db954'; ctx.fillRect(x,y-20,20,20);
       for(let i=obs.length-1;i>=0;i--){ obs[i].x-=6; ctx.fillStyle='#e06'; ctx.fillRect(obs[i].x,obs[i].y,obs[i].w,12); if(obs[i].x+obs[i].w < 0) { obs.splice(i,1); score++; } // passed
         // collision
-        if(x < obs[i].x+obs[i].w && x+20 > obs[i].x && y-20 < obs[i].y+12 && y > obs[i].y){ running=false; }
+          if(alive && x < obs[i].x+obs[i].w && x+20 > obs[i].x && y-20 < obs[i].y+12 && y > obs[i].y){
+            // player died — schedule auto-restart
+            alive = false;
+            // show a tiny message overlay
+            const msg = document.createElement('div');
+            msg.textContent = 'aww — restart soon';
+            msg.style.position = 'absolute'; msg.style.zIndex = '3'; msg.style.left='50%'; msg.style.top='28%'; msg.style.transform='translateX(-50%)'; msg.style.padding='8px 12px'; msg.style.borderRadius='8px'; msg.style.background='rgba(0,0,0,0.6)'; msg.style.color='var(--text)'; wrap.appendChild(msg);
+            restartTimeout = setTimeout(()=>{
+              // reset state
+              obs = [];
+              score = 0;
+              x = 60; y = 100; vy = 0; jumping = false;
+              alive = true;
+              if(msg.parentNode) msg.parentNode.removeChild(msg);
+              restartTimeout = null;
+            }, 1200);
+          }
       }
       ctx.fillStyle='#9b9b9b'; ctx.fillText('Score: '+score, canvas.width-90, 20);
       requestAnimationFrame(loop);
@@ -668,11 +696,11 @@
     jumpBtn.addEventListener('touchstart', doJump); jumpBtn.addEventListener('mousedown', doJump);
     function onKey(e){ if((e.code==='Space' || e.key===' ') ) doJump(); }
     window.addEventListener('keydown', onKey);
-    spawn();
+    startSpawning();
     // start spawning kaomojis
     kaomojiInterval = setInterval(spawnKaomoji, 800);
     loop();
-    return ()=>{ running=false; window.removeEventListener('keydown', onKey); jumpBtn.replaceWith(jumpBtn.cloneNode(true)); clearInterval(kaomojiInterval); };
+    return ()=>{ active=false; window.removeEventListener('keydown', onKey); jumpBtn.replaceWith(jumpBtn.cloneNode(true)); clearInterval(kaomojiInterval); if (restartTimeout) { clearTimeout(restartTimeout); restartTimeout = null; } if (spawnInterval) { clearInterval(spawnInterval); spawnInterval = null; } };
   }
 
   // Fishing game — fishing-pac replacement, touch controls: left/right and cast
