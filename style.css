@@ -366,6 +366,80 @@ body.light{--bg-900:#f6f6f6;--bg-800:#ffffff;--panel:rgba(0,0,0,0.03);--text:#0b
 /* ------------- accessibility ------------- */
 :focus{outline:2px solid rgba(29,185,84,0.15);outline-offset:2px}
 
-/* ------------- developer helpers (remove in prod) ------------- */
-/* show layout grid for debugging */
-/* .cards-grid{background:linear-gradient(45deg, rgba(255,255,255,0.01) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.01) 75%, rgba(255,255,255,0.01)),linear-gradient(45deg, rgba(255,255,255,0.01) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.01) 75%, rgba(255,255,255,0.01));background-size:40px 40px} */
+#sidebar,
+#homeContent,
+#playlist-container,
+#librarySection,
+#topbar,
+#header,
+.navbar,
+footer,
+#now-playing-container,
+.now-playing-panel,
+#npWrapper,
+#searchPage,
+#homeContent,
+#libraryContent {
+    display: none !important;
+}
+/* FULLSCREEN LYRICS CONTAINER */
+#lyricsModal,
+#lyrics-panel,
+#lyrics-container {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    z-index: 9999 !important;
+}
+/* LYRICS LIST FULLSCREEN + CENTERED */
+#lyrics-list {
+    width: 100%;
+    height: 100%;
+    max-height: none !important;
+    overflow-y: hidden !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#lyrics-list li {
+    list-style: none;
+    font-size: 2.4rem;
+    margin: 8px 0;
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 500;
+    transition: 0.25s ease;
+    text-align: center;
+    padding: 0 1rem;
+}
+
+/* ACTIVE LINE — MAKE IT SPOTIFY GLOW */
+#lyrics-list li.active {
+    color: #fff;
+    font-weight: 800;
+    text-shadow: 0 0 30px rgba(0, 255, 90, 0.8);
+    transform: scale(1.03);
+}
+/* SPOTIFY BLURRED BACKGROUND */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: url("assets/covers/pee.jpg") center/cover no-repeat;
+    filter: blur(25px) brightness(0.35) saturate(1.2);
+    z-index: -1;
+}
+/* HIDE SCROLLBAR FOR CLEAN LOOK */
+::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
