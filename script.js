@@ -12,7 +12,7 @@
         artist: 'Shootmeplease2',
         cover: 'assets/covers/pee.jpg',
         tracks: [
-            { id: 't1', title: 'Teenage Dirtbag', artist: 'Wheatus', src: 'assets/tb.mp3', sweetMessage: 'Noelle — you make my world a little brighter every day. 💖', lyrics: [
+            { id: 't1', title: 'Teenage Dirtbag', artist: 'Wheatus', src: 'assets/tb.mp3', lyrics: [
               `Her name is Noelle, I have a dream about her
 She rings my bell, I got gym class in half an hour
 Oh, how she rocks in Keds and tube socks
