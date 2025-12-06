@@ -144,7 +144,7 @@ S-S-S and M-M-M`
             ] },
             // Demo track with safe, non-copyrighted example showing
             // paragraph and newline formatting for lyrics rendering.
-            { id: 't_demo', title: 'Love Me Not', artist: 'Ravyn Lenae ft. Rex Orange County', src: 'assets/love.mp3', lyrics: [
+            { id: 't_demo', title: 'Love Me Not', artist: 'Ravyn Lenae ft. Rex Orange County', src: 'assets/LOVE.mp3', lyrics: [
               `See, right now, I need you, I'll meet you somewhere now
 You up now, I see you, I get you, take care now
 Slow down, be cool, I miss you, come here now
