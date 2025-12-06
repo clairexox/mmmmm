@@ -549,10 +549,6 @@ No, she doesn't know what she's missin'`
     refs.lyricsBox.innerHTML = '';
     if (!lines || !lines.length) return;
 
-    // Support paragraphs: allow each string to contain one or more paragraphs
-    // separated by blank lines (\n or \n\n). We split each incoming
-    // entry into individual rendered lines so timing/sync uses the
-    // actual number of displayed lines.
     const elems = [];
     lines.forEach(l => {
       // split on one or more blank lines/newlines
@@ -703,15 +699,12 @@ No, she doesn't know what she's missin'`
 
     // Local-file picker removed; playback uses configured `track.src` and the green play button.
 
-    // Click lyrics box to toggle fullscreen
     if (refs.lyricsBox) {
-      refs.lyricsBox.addEventListener('click', (e) => {
-        // if user selected text or clicked a link, don't toggle
-        const sel = window.getSelection();
-        if (sel && sel.toString()) return;
-        toggleLyricsFullscreen();
-      });
-    }
+  refs.lyricsBox.addEventListener('click', () => {
+    openLyricsFullscreen(state.playlistIndex, state.trackIndex);
+  });
+}
+
 
     // Start with first track loaded (no autoplay)
     setTrack(0, 0, { autoplay: false });
@@ -1099,70 +1092,91 @@ No, she doesn't know what she's missin'`
     }
   });
 
-  // open fullscreen lyrics modal for a given playlist/track index
-  function openLyricsFullscreen(pi, ti, sweetText){
+    // clean lyrics fullscreen modal – NO sweet messages
+  function openLyricsFullscreen(pi, ti) {
     const pl = DATA.playlists[pi];
-    if(!pl) return;
+    if (!pl) return;
     const track = pl.tracks[ti];
-    if(!track) return;
+    if (!track) return;
+
     const overlay = document.createElement('div');
     overlay.className = 'lyrics-fullscreen-modal';
 
     const closeBtn = document.createElement('button');
     closeBtn.className = 'close-btn';
     closeBtn.textContent = 'Close';
-    closeBtn.addEventListener('click', ()=>{ if(overlay._cleanup) overlay._cleanup(); document.body.removeChild(overlay); });
+    closeBtn.addEventListener('click', () => {
+      if (overlay._cleanup) overlay._cleanup();
+      document.body.removeChild(overlay);
+    });
     overlay.appendChild(closeBtn);
 
-    const inner = document.createElement('div'); inner.className = 'inner';
-    const left = document.createElement('div'); left.className = 'col-left';
-    const right = document.createElement('div'); right.className = 'col-right';
+    const inner = document.createElement('div');
+    inner.className = 'inner';
 
-    // sweet note
-    const note = document.createElement('div'); note.className = 'sweet-note';
-    note.textContent = sweetText || 'For you — my sweetest melody.';
-    left.appendChild(note);
+    const left = document.createElement('div');
+    left.className = 'col-left';
 
-    // big lyrics area
-    const big = document.createElement('div'); big.className = 'big-lyrics';
-    left.appendChild(big);
+    const right = document.createElement('div');
+    right.className = 'col-right';
 
-    // right column: small meta + audio controls
-    const meta = document.createElement('div'); meta.style.color = 'var(--muted)';
-    meta.innerHTML = `<div style="font-weight:800">${track.title}</div><div style="margin-top:6px">${track.artist}</div>`;
+    // TITLE + ARTIST
+    const title = document.createElement('div');
+    title.style.fontSize = '32px';
+    title.style.fontWeight = '700';
+    title.style.marginBottom = '6px';
+    title.textContent = track.title;
+    left.appendChild(title);
+
+    const artist = document.createElement('div');
+    artist.style.color = 'var(--muted)';
+    artist.style.fontSize = '18px';
+    artist.style.marginBottom = '24px';
+    artist.textContent = track.artist;
+    left.appendChild(artist);
+
+    // LYRICS
+    const lyricsBox = document.createElement('div');
+    lyricsBox.style.whiteSpace = 'pre-line';
+    lyricsBox.style.fontSize = '20px';
+    lyricsBox.style.lineHeight = '1.6';
+    lyricsBox.style.maxHeight = '70vh';
+    lyricsBox.style.overflowY = 'auto';
+    lyricsBox.style.paddingRight = '20px';
+
+    const lyricsText = track.lyrics?.join("\n\n") || "No lyrics provided.";
+    lyricsBox.textContent = lyricsText;
+    left.appendChild(lyricsBox);
+
+    // RIGHT SIDE META
+    const meta = document.createElement('div');
+    meta.innerHTML = `
+      <div style="font-weight:700">${pl.title}</div>
+      <div style="margin-top:6px;color:var(--muted)">${pl.artist}</div>
+    `;
     right.appendChild(meta);
-    // attach existing player controls info
-    const hint = document.createElement('div'); hint.className = 'hint'; hint.style.marginTop='12px'; hint.textContent = 'Use the player below to play and scrub. Active line stays centered.';
+
+    const hint = document.createElement('div');
+    hint.style.marginTop = '16px';
+    hint.style.color = 'var(--muted)';
+    hint.textContent = 'Use the player below to play and scrub.';
     right.appendChild(hint);
 
-    inner.appendChild(left); inner.appendChild(right);
+    inner.appendChild(left);
+    inner.appendChild(right);
     overlay.appendChild(inner);
+
     document.body.appendChild(overlay);
 
-    // show the track's sweet message (prefer per-track message, then provided sweetText)
-    const message = track.sweetMessage || sweetText || pl.sweetMessage || 'A little note for you.';
-    const msgEl = document.createElement('div');
-    msgEl.style.fontSize = '36px';
-    msgEl.style.lineHeight = '1.4';
-    msgEl.style.textAlign = 'center';
-    msgEl.style.padding = '40px';
-    msgEl.style.color = 'var(--text)';
-    msgEl.textContent = message;
-    big.appendChild(msgEl);
-
-    // cleanup (no listeners attached in simplified modal)
-    overlay._cleanup = ()=>{};
-
-    return overlay;
+    overlay._cleanup = () => {};
   }
 
-  // open lyrics fullscreen cleanly (no sweet messages)
-if (refs.lyricsBox) {
+  // FIX CLICK HANDLER (remove sweetText param)
+  if (refs.lyricsBox) {
     refs.lyricsBox.addEventListener('click', () => {
-        openLyricsFullscreen(state.playlistIndex, state.trackIndex, "");
+      openLyricsFullscreen(state.playlistIndex, state.trackIndex);
     });
-}
+  }
 
   init();
-  
 })();
