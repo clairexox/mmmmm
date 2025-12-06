@@ -9,7 +9,7 @@
         id: 'p1',
         title: 'From your side, to mine',
         sweetMessage: 'For you — my favorite songs and tiny love notes. ❤',
-        artist: 'Shootmeplease^2',
+        artist: 'Shootmeplease²',
         cover: 'assets/covers/pee.jpg',
         tracks: [
             { id: 't1', title: 'Teenage Dirtbag', artist: 'Wheatus', src: 'assets/tb.mp3', lyrics: [
@@ -206,9 +206,9 @@ Oh, no, I don't need you, but I miss you, come here`
       },
       {
         id: 'p2',
-        title: 'One song that reminds me of you',
+        title: 'One song that reminds me of us?',
         
-        artist: 'gyuurin + shootmeplease^2',
+        artist: 'gyuurin + shootmeplease²',
         cover: 'assets/covers/buncof.jpg',
         tracks: [ { id: 't3', title: 'Duck Pond', artist: 'gyuurin', src: 'assets/tb.mp3', sweetMessage: 'Ducks and warm afternoons — thinking of you. 🦆', lyrics: ['quack quack','splash','cute little ducks','i love this'] } ]
       },
