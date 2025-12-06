@@ -50,7 +50,7 @@ No, she doesn't know what she's missin'
 Oh, yeah, dirtbag
 No, she doesn't know what she's missin'`
             ] },
-            { id: 't2', title: 'S&M', artist: 'Rihanna', src: 'assets/tb.mp3', lyrics: [
+            { id: 't2', title: 'S&M', artist: 'Rihanna', src: 'assets/rih.mp3', lyrics: [
               `Na-na-na, come on
 Na-na-na, come on
 Na-na-na-na-na, come on
@@ -143,7 +143,7 @@ S-S-S and M-M-M`
             ] },
             // Demo track with safe, non-copyrighted example showing
             // paragraph and newline formatting for lyrics rendering.
-            { id: 't_demo', title: 'Demo: Paragraphs', artist: 'Example', src: 'assets/tb.mp3', sweetMessage: 'A tiny demo just for you — love you lots. 🌸', lyrics: [
+            { id: 't_demo', title: 'Sincerely, me', artist: 'Example', src: 'assets/tb.mp3', sweetMessage: 'A tiny demo just for you — love you lots. 🌸', lyrics: [
               "This is the first paragraph.\nIt demonstrates a line break inside a paragraph.",
               "Here is the second paragraph, shown as its own block.",
               "Final short line to finish the demo."
