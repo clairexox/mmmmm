@@ -274,7 +274,12 @@ how are you right now? good? i hope so
 
 this song never fails to remind me of you
 your kindness towards me, the sound of your laughter and also your sleepy voice
-i dont know what to say a`] } ]
+this song is special to me. everytime i look at the stars, it reminds me of you.
+thank you for always returning home to me.
+
+i promise we'll make it out together.
+lets not give up, okay?
+i love you.`] } ]
       }
     ],
     more: [
